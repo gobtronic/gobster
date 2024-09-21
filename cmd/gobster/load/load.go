@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
+	"github.com/gobtronic/gobster/cmd/gobster/display"
 	"github.com/mmcdole/gofeed"
 )
 
@@ -19,10 +20,7 @@ func NewModel() model {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-
-	return model{
-		spinner: s,
-	}
+	return model{spinner: s}
 }
 
 func (m model) Init() tea.Cmd {
@@ -39,7 +37,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 	case *gofeed.Feed:
-		return m, nil
+		displayModel := display.NewModel(msg)
+		return displayModel, displayModel.Init()
 	case error:
 		m.err = msg
 		return m, tea.Quit

@@ -14,7 +14,7 @@ func main() {
 
 	p := tea.NewProgram(load.NewModel())
 	if _, err := p.Run(); err != nil {
-		log.Error("Alas, there's been an error", "err", err)
+		log.Error("An error occured while initializing gobster", "err", err)
 		os.Exit(1)
 	}
 }

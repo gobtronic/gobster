@@ -33,28 +33,30 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "esc", "ctrl+c":
 			return m, tea.Quit
-		default:
-			return m, nil
 		}
+
 	case *gofeed.Feed:
 		displayModel := display.NewModel(msg)
 		return displayModel, displayModel.Init()
 	case error:
 		m.err = msg
 		return m, tea.Quit
+
 	default:
 		var cmd tea.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
 		return m, cmd
 	}
+
+	return m, nil
 }
 
 func (m model) View() string {
 	if m.err != nil {
-		log.Error("An error occured while retrieving posts", "err", m.err)
+		log.Error("An error occured while retrieving discussions", "err", m.err)
 		return ""
 	}
-	return fmt.Sprintf("%s Retrieving latest Lobsters posts...\n", m.spinner.View())
+	return fmt.Sprintf("  %sretrieving latest discussions...\n", m.spinner.View())
 }
 
 func parseFeed() tea.Msg {

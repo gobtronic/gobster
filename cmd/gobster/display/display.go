@@ -3,26 +3,20 @@ package display
 import (
 	"fmt"
 	"io"
-	"math"
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mmcdole/gofeed"
 )
 
 type model struct {
-	feed    *gofeed.Feed
-	list    list.Model
-	timer   timer.Model
-	loading bool
-	err     error
+	feed            *gofeed.Feed
+	initialTermSize [2]int
+	list            list.Model
+	err             error
 }
-
-const listHeight = 20
 
 var (
 	titleStyle        = lipgloss.NewStyle().MarginLeft(2).Bold(true)
@@ -49,19 +43,17 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 	}
 
 	str := fmt.Sprintf("%d. %s", index+1, i)
-
 	fn := itemStyle.Render
 	if index == m.Index() {
 		fn = func(s ...string) string {
 			return selectedItemStyle.Render("➜ " + strings.Join(s, " "))
 		}
 	}
-
 	fmt.Fprint(w, fn(str))
 }
 
-func NewModel(feed *gofeed.Feed) model {
-	l := list.New([]list.Item{}, itemDelegate{}, 50, listHeight)
+func NewModel(feed *gofeed.Feed, initialTermSize [2]int) model {
+	l := list.New([]list.Item{}, itemDelegate{}, initialTermSize[0], initialTermSize[1])
 	l.Title = "lobste.rs - active discussions"
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(true)
@@ -69,56 +61,31 @@ func NewModel(feed *gofeed.Feed) model {
 	l.Styles.PaginationStyle = paginationStyle
 	l.Styles.HelpStyle = helpStyle
 
-	timeInterval := time.Millisecond * 30
-	maxItemsPerPage := listHeight - 6
-	timeout := timeInterval * time.Duration(math.Min(float64(len(feed.Items)-1), float64(maxItemsPerPage)))
+	items := []list.Item{}
+	for _, v := range feed.Items {
+		items = append(items, item(v.Title))
+	}
+	l.SetItems(items)
+
 	return model{
-		feed:    feed,
-		list:    l,
-		timer:   timer.NewWithInterval(timeout, timeInterval),
-		loading: true,
+		feed:            feed,
+		initialTermSize: initialTermSize,
+		list:            l,
 	}
 }
 
 func (m model) Init() tea.Cmd {
-	return m.timer.Init()
+	return nil
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case timer.TickMsg:
-		if msg.Timeout {
-			return m, nil
-		}
-		var cmd tea.Cmd
-		m.timer, cmd = m.timer.Update(msg)
-		curListItemsLen := len(m.list.Items())
-		updatedItems := append(m.list.Items(), item(m.feed.Items[curListItemsLen].Title))
-		m.list.SetItems(updatedItems)
-		return m, cmd
-	case timer.StartStopMsg:
-		var cmd tea.Cmd
-		m.timer, cmd = m.timer.Update(msg)
-		return m, cmd
-	case timer.TimeoutMsg:
-		curItems := m.list.Items()
-		endItems := []list.Item{}
-		for i := len(curItems); i < len(m.feed.Items); i++ {
-			endItems = append(endItems, item(m.feed.Items[i].Title))
-		}
-		curItems = append(curItems, endItems...)
-
-		m.list.SetItems(curItems)
-		m.loading = false
-
 	case tea.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
+		m.list.SetHeight(msg.Height)
 		return m, nil
 
 	case tea.KeyMsg:
-		if m.loading {
-			return m, nil
-		}
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit

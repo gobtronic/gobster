@@ -12,8 +12,9 @@ import (
 )
 
 type model struct {
-	spinner spinner.Model
-	err     error
+	spinner  spinner.Model
+	err      error
+	termSize [2]int
 }
 
 func NewModel() model {
@@ -29,6 +30,10 @@ func (m model) Init() tea.Cmd {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.termSize = [2]int{msg.Width, msg.Height}
+		return m, nil
+
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "esc", "ctrl+c":
@@ -36,7 +41,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case *gofeed.Feed:
-		displayModel := display.NewModel(msg)
+		displayModel := display.NewModel(msg, m.termSize)
 		return displayModel, displayModel.Init()
 	case error:
 		m.err = msg

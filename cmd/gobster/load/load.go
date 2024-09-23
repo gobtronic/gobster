@@ -12,11 +12,15 @@ import (
 )
 
 type model struct {
-	spinner  spinner.Model
-	err      error
+	// The load spinner model
+	spinner spinner.Model
+	// Any error that could occur during loading
+	err error
+	// The current terminal window size {width, height}
 	termSize [2]int
 }
 
+// Returns a new load.model instance
 func NewModel() model {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
@@ -65,6 +69,8 @@ func (m model) View() string {
 	return fmt.Sprintf("\n  %s%s\n", m.spinner.View(), style.Render("retrieving latest discussions..."))
 }
 
+// Retrieves and parses the lobste.rs rss feed
+// Returns the feed if it succeed, returns an error otherwise
 func parseFeed() tea.Msg {
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL("https://lobste.rs/rss")

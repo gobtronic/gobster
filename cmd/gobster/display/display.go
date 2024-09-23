@@ -11,18 +11,17 @@ import (
 )
 
 type model struct {
-	feed            *gofeed.Feed
-	initialTermSize [2]int
-	list            list.Model
-	err             error
+	feed *gofeed.Feed
+	list list.Model
+	err  error
 }
 
+// Returns a new display.model
 func NewModel(feed *gofeed.Feed, initialTermSize [2]int) model {
 	l := listdef.NewList(feed, initialTermSize)
 	return model{
-		feed:            feed,
-		initialTermSize: initialTermSize,
-		list:            l,
+		feed: feed,
+		list: l,
 	}
 }
 
@@ -57,6 +56,7 @@ func (m model) View() string {
 	return m.list.View()
 }
 
+// Opens an url in the default user's browser
 func openInBrowser(url string) {
 	if url == "" {
 		return

@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	titleStyle      = lipgloss.NewStyle().MarginLeft(2).Bold(true)
+	titleStyle      = lipgloss.NewStyle().MarginLeft(2).MarginTop(1).Bold(true)
 	paginationStyle = bubblelist.DefaultStyles().PaginationStyle.PaddingLeft(4)
 	helpStyle       = bubblelist.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
 )

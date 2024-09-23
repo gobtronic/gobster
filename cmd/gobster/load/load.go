@@ -61,7 +61,8 @@ func (m model) View() string {
 		log.Error("An error occured while retrieving discussions", "err", m.err)
 		return ""
 	}
-	return fmt.Sprintf("  %sretrieving latest discussions...\n", m.spinner.View())
+	style := lipgloss.NewStyle().Bold(true)
+	return fmt.Sprintf("\n  %s%s\n", m.spinner.View(), style.Render("retrieving latest discussions..."))
 }
 
 func parseFeed() tea.Msg {

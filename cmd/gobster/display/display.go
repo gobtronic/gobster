@@ -58,6 +58,10 @@ func (m model) View() string {
 }
 
 func openInBrowser(url string) {
+	if url == "" {
+		return
+	}
+
 	switch runtime.GOOS {
 	case "linux":
 		_ = exec.Command("xdg-open", url).Start()

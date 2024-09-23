@@ -127,7 +127,7 @@ func NewList(feed *gofeed.Feed, initialTermSize [2]int) bubblelist.Model {
 		items = append(items, Item{
 			title:      v.Title,
 			categories: v.Categories,
-			Url:        v.Links[0],
+			Url:        v.Link,
 		})
 	}
 	l.SetItems(items)

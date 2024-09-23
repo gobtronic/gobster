@@ -1,6 +1,9 @@
 package display
 
 import (
+	"os/exec"
+	"runtime"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	listdef "github.com/gobtronic/gobster/cmd/gobster/display/list"
@@ -38,6 +41,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
+		case " ", "enter":
+			item := m.list.SelectedItem().(listdef.Item)
+			openInBrowser(item.Url)
+			return m, nil
 		}
 	}
 
@@ -48,4 +55,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	return m.list.View()
+}
+
+func openInBrowser(url string) {
+	switch runtime.GOOS {
+	case "linux":
+		_ = exec.Command("xdg-open", url).Start()
+	case "windows":
+		_ = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		_ = exec.Command("open", url).Start()
+	}
 }

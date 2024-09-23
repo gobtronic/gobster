@@ -1,7 +1,7 @@
 # gobster
 
 <p>
-    <a href="https://github.com/gobtronic/gobster/releases"><img src="https://img.shields.io/github/release/gobtronic/gobster.svg" alt="Latest Release"></a>
+    <a href="https://github.com/gobtronic/gobster/tags"><img src="https://img.shields.io/github/v/tag/gobtronic/gobster.svg" alt="Latest Tag"></a>
     <a href="https://github.com/gobtronic/gobster/actions"><img src="https://github.com/gobtronic/gobster/actions/workflows/build.yml/badge.svg" alt="Build Status"></a>
 </p>
 

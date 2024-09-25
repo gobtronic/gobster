@@ -4,9 +4,15 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	bubblelist "github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
+)
+
+const (
+	itemPrefixLength = len("➜  1. ")
+	dateFormat       = "Mon _2 Jan 2006 - 15:04"
 )
 
 func (d itemDelegate) Render(w io.Writer, m bubblelist.Model, index int, listItem bubblelist.Item) {
@@ -22,21 +28,25 @@ func (d itemDelegate) Render(w io.Writer, m bubblelist.Model, index int, listIte
 
 // Renders the item's main line (index, title and categories)
 func (d itemDelegate) renderMainLine(i Item, index int, selected bool) string {
-	style := lipgloss.NewStyle().PaddingLeft(4)
+	padding := 4
 	if selected {
-		style = style.PaddingLeft(2)
+		padding = 2
 	}
+
+	style := lipgloss.NewStyle().PaddingLeft(padding)
+
 	indexStr := d.renderIndex(index, selected)
 	titleStr := d.renderTitle(i.title, selected)
 	categoriesStr := d.renderCategories(i.categories)
-	str := fmt.Sprintf("%s %s %s", indexStr, titleStr, categoriesStr)
+	dateStr := d.renderDate(i.date)
+	str := fmt.Sprintf("%s %s %s\n%[4]*s%s", indexStr, titleStr, categoriesStr, itemPrefixLength-padding, "", dateStr)
 	return style.Render(str)
 }
 
 // Renders the item's index
 func (d itemDelegate) renderIndex(index int, selected bool) string {
 	style := lipgloss.NewStyle()
-	fmtIndex := fmt.Sprintf("%d.", index+1)
+	fmtIndex := fmt.Sprintf("%2d.", index+1)
 	if selected {
 		style = style.Bold(true)
 		return style.Render("➜ " + fmtIndex)
@@ -72,4 +82,14 @@ func (d itemDelegate) renderCategory(cat string) string {
 	}
 	style := lipgloss.NewStyle().Foreground(bgColor).Italic(true)
 	return style.Render("<" + cat + ">")
+}
+
+func (d itemDelegate) renderDate(date *time.Time) string {
+	if date == nil {
+		return ""
+	}
+
+	style := lipgloss.NewStyle().Foreground(dimForeground)
+
+	return style.Render(date.Format(dateFormat))
 }

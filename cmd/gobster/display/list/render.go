@@ -15,6 +15,43 @@ const (
 	dateFormat       = "Mon _2 Jan 2006 - 15:04"
 )
 
+type styleProvider struct {
+	mainLine   lipgloss.Style
+	index      lipgloss.Style
+	title      lipgloss.Style
+	categories lipgloss.Style
+	category   lipgloss.Style
+	date       lipgloss.Style
+}
+
+func newStyleProvider(selected bool) styleProvider {
+	mainLinePadding := 4
+	if selected {
+		mainLinePadding = 2
+	}
+	mainLineStyle := lipgloss.NewStyle().PaddingLeft(mainLinePadding)
+
+	indexStyle := lipgloss.NewStyle()
+
+	titleStyle := lipgloss.NewStyle()
+	if selected {
+		titleStyle = titleStyle.Underline(true)
+	}
+
+	categoriesStyle := lipgloss.NewStyle()
+	categoryStyle := lipgloss.NewStyle().Italic(true)
+	dateStyle := lipgloss.NewStyle().Foreground(dimForeground)
+
+	return styleProvider{
+		mainLine:   mainLineStyle,
+		index:      indexStyle,
+		title:      titleStyle,
+		categories: categoriesStyle,
+		category:   categoryStyle,
+		date:       dateStyle,
+	}
+}
+
 func (d itemDelegate) Render(w io.Writer, m bubblelist.Model, index int, listItem bubblelist.Item) {
 	i, ok := listItem.(Item)
 	if !ok {
@@ -22,74 +59,57 @@ func (d itemDelegate) Render(w io.Writer, m bubblelist.Model, index int, listIte
 	}
 
 	selected := index == m.Index()
-	str := d.renderMainLine(i, index, selected)
+	str := d.renderMainLine(newStyleProvider(selected), i, index, selected)
 	fmt.Fprint(w, str)
 }
 
 // Renders the item's main line (index, title and categories)
-func (d itemDelegate) renderMainLine(i Item, index int, selected bool) string {
-	padding := 4
-	if selected {
-		padding = 2
-	}
-
-	style := lipgloss.NewStyle().PaddingLeft(padding)
-
-	indexStr := d.renderIndex(index, selected)
-	titleStr := d.renderTitle(i.title, selected)
-	categoriesStr := d.renderCategories(i.categories)
-	dateStr := d.renderDate(i.date)
-	str := fmt.Sprintf("%s %s %s\n%[4]*s%s", indexStr, titleStr, categoriesStr, itemPrefixLength-padding, "", dateStr)
+func (d itemDelegate) renderMainLine(styles styleProvider, i Item, index int, selected bool) string {
+	style := styles.mainLine
+	indexStr := d.renderIndex(styles.index, index, selected)
+	titleStr := d.renderTitle(styles.title, i.title)
+	categoriesStr := d.renderCategories(styles.categories, styles.category, i.categories)
+	dateStr := d.renderDate(styles.date, i.date)
+	str := fmt.Sprintf("%s %s %s\n%[4]*s%s", indexStr, titleStr, categoriesStr, itemPrefixLength-style.GetPaddingLeft(), "", dateStr)
 	return style.Render(str)
 }
 
 // Renders the item's index
-func (d itemDelegate) renderIndex(index int, selected bool) string {
-	style := lipgloss.NewStyle()
+func (d itemDelegate) renderIndex(style lipgloss.Style, index int, selected bool) string {
 	fmtIndex := fmt.Sprintf("%2d.", index+1)
 	if selected {
-		style = style.Bold(true)
 		return style.Render("➜ " + fmtIndex)
 	}
 	return style.Render(fmtIndex)
 }
 
 // Renders the item's title
-func (d itemDelegate) renderTitle(title string, selected bool) string {
-	style := lipgloss.NewStyle()
-	str := fmt.Sprintf("%s", title)
-	if selected {
-		style = style.Underline(true)
-	}
-	return style.Render(str)
+func (d itemDelegate) renderTitle(style lipgloss.Style, title string) string {
+	return style.Render(title)
 }
 
 // Renders the item's categories
-func (d itemDelegate) renderCategories(categories []string) string {
-	style := lipgloss.NewStyle()
+func (d itemDelegate) renderCategories(style lipgloss.Style, categoryStyle lipgloss.Style, categories []string) string {
 	fmtCategories := []string{}
 	for _, c := range categories {
-		fmtCategories = append(fmtCategories, d.renderCategory(c))
+		fmtCategories = append(fmtCategories, d.renderCategory(categoryStyle, c))
 	}
 	return style.Render(strings.Join(fmtCategories, " "))
 }
 
 // Renders a single category
-func (d itemDelegate) renderCategory(cat string) string {
+func (d itemDelegate) renderCategory(style lipgloss.Style, cat string) string {
 	bgColor := tagDefaultBackground
 	if color, ok := catBackgrounds[cat]; ok {
 		bgColor = color
 	}
-	style := lipgloss.NewStyle().Foreground(bgColor).Italic(true)
+	style = style.Foreground(bgColor)
 	return style.Render("<" + cat + ">")
 }
 
-func (d itemDelegate) renderDate(date *time.Time) string {
+func (d itemDelegate) renderDate(style lipgloss.Style, date *time.Time) string {
 	if date == nil {
 		return ""
 	}
-
-	style := lipgloss.NewStyle().Foreground(dimForeground)
-
 	return style.Render(date.Format(dateFormat))
 }

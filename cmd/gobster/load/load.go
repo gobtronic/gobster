@@ -2,7 +2,6 @@ package load
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -73,16 +72,8 @@ func (m model) View() string {
 // Retrieves and parses the lobste.rs rss feed
 // Returns the feed if it succeed, returns an error otherwise
 func parseFeed() tea.Msg {
-	f, err := tea.LogToFile("debug.log", "debug")
-	if err != nil {
-		fmt.Println("fatal:", err)
-		os.Exit(1)
-	}
-	defer f.Close()
-
 	feed, err := feed.FetchFeed(feed.Active)
 	if err != nil {
-		f.WriteString(err.Error() + "\n")
 		return err
 	}
 	return &feed

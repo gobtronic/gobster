@@ -18,12 +18,12 @@ const (
 )
 
 type styleProvider struct {
-	mainLine   lipgloss.Style
-	index      lipgloss.Style
-	title      lipgloss.Style
-	categories lipgloss.Style
-	category   lipgloss.Style
-	date       lipgloss.Style
+	mainLine lipgloss.Style
+	index    lipgloss.Style
+	title    lipgloss.Style
+	tags     lipgloss.Style
+	tag      lipgloss.Style
+	date     lipgloss.Style
 }
 
 func newStyleProvider(selected bool) styleProvider {
@@ -40,17 +40,17 @@ func newStyleProvider(selected bool) styleProvider {
 		titleStyle = titleStyle.Underline(true)
 	}
 
-	categoriesStyle := lipgloss.NewStyle()
-	categoryStyle := lipgloss.NewStyle().Italic(true)
+	tagsStyle := lipgloss.NewStyle()
+	tagStyle := lipgloss.NewStyle().Italic(true)
 	dateStyle := lipgloss.NewStyle().Foreground(dimForeground)
 
 	return styleProvider{
-		mainLine:   mainLineStyle,
-		index:      indexStyle,
-		title:      titleStyle,
-		categories: categoriesStyle,
-		category:   categoryStyle,
-		date:       dateStyle,
+		mainLine: mainLineStyle,
+		index:    indexStyle,
+		title:    titleStyle,
+		tags:     tagsStyle,
+		tag:      tagStyle,
+		date:     dateStyle,
 	}
 }
 
@@ -70,9 +70,9 @@ func (d itemDelegate) renderItem(styles styleProvider, i feed.Item, index int, s
 	style := styles.mainLine
 	indexStr := d.renderIndex(styles.index, index, selected)
 	titleStr := d.renderTitle(styles.title, i.Title)
-	categoriesStr := d.renderCategories(styles.categories, styles.category, i.Tags)
+	tagsStr := d.renderTags(styles.tags, styles.tag, i.Tags)
 	dateStr := d.renderDate(styles.date, &i.CreatedAt.Time)
-	str := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-style.GetPaddingLeft(), "", dateStr, categoriesStr)
+	str := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-style.GetPaddingLeft(), "", dateStr, tagsStr)
 	return style.Render(str)
 }
 
@@ -97,17 +97,17 @@ func (d itemDelegate) renderDate(style lipgloss.Style, date *time.Time) string {
 	return style.Render(format.FmtRelativeDateToNow(date))
 }
 
-// Renders the item's categories
-func (d itemDelegate) renderCategories(style lipgloss.Style, categoryStyle lipgloss.Style, categories []string) string {
-	fmtCategories := []string{}
-	for _, c := range categories {
-		fmtCategories = append(fmtCategories, d.renderCategory(categoryStyle, c))
+// Renders the item's tags
+func (d itemDelegate) renderTags(style lipgloss.Style, tagStyle lipgloss.Style, tags []string) string {
+	fmtTags := []string{}
+	for _, t := range tags {
+		fmtTags = append(fmtTags, d.renderTag(tagStyle, t))
 	}
-	return style.Render(strings.Join(fmtCategories, " "))
+	return style.Render(strings.Join(fmtTags, " "))
 }
 
-// Renders a single category
-func (d itemDelegate) renderCategory(style lipgloss.Style, cat string) string {
+// Renders a single tag
+func (d itemDelegate) renderTag(style lipgloss.Style, cat string) string {
 	bgColor := tagDefaultBackground
 	if color, ok := catBackgrounds[cat]; ok {
 		bgColor = color

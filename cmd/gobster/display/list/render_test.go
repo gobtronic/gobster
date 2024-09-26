@@ -53,21 +53,21 @@ func TestRenderDate(t *testing.T) {
 	assert.Equal(t, styles.date.Render(expected), str)
 }
 
-func TestRenderCategories(t *testing.T) {
+func TestRenderTags(t *testing.T) {
 	styles := newStyleProvider(false)
 	delegate := itemDelegate{}
-	categories := []string{"programming", "go"}
-	fmtCat := []string{}
-	for _, cat := range categories {
-		fmtCat = append(fmtCat, delegate.renderCategory(styles.category, cat))
+	tags := []string{"programming", "go"}
+	fmtTags := []string{}
+	for _, t := range tags {
+		fmtTags = append(fmtTags, delegate.renderTag(styles.tag, t))
 	}
 
-	str := delegate.renderCategories(styles.categories, styles.category, []string{"programming", "go"})
+	str := delegate.renderTags(styles.tags, styles.tag, []string{"programming", "go"})
 
-	assert.Equal(t, styles.categories.Render(strings.Join(fmtCat, " ")), str)
+	assert.Equal(t, styles.tags.Render(strings.Join(fmtTags, " ")), str)
 }
 
-func TestRenderCategory(t *testing.T) {
+func TestRenderTag(t *testing.T) {
 	styles := newStyleProvider(false)
 	delegate := itemDelegate{}
 	cat := "programming"
@@ -76,8 +76,8 @@ func TestRenderCategory(t *testing.T) {
 		catSpecificForeground = tagDefaultBackground
 	}
 
-	str := delegate.renderCategory(styles.category, cat)
-	expectedCatStyle := styles.category.Foreground(catSpecificForeground)
+	str := delegate.renderTag(styles.tag, cat)
+	expectedCatStyle := styles.tag.Foreground(catSpecificForeground)
 
 	assert.Equal(t, expectedCatStyle.Render(fmt.Sprintf("<%s>", cat)), str)
 }
@@ -95,9 +95,9 @@ func TestRenderItem(t *testing.T) {
 	}
 	indexStr := delegate.renderIndex(styles.index, 1, false)
 	titleStr := delegate.renderTitle(styles.title, item.Title)
-	categoriesStr := delegate.renderCategories(styles.categories, styles.category, item.Tags)
+	tagsStr := delegate.renderTags(styles.tags, styles.tag, item.Tags)
 	dateStr := delegate.renderDate(styles.date, &item.CreatedAt.Time)
-	expected := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-styles.mainLine.GetPaddingLeft(), "", dateStr, categoriesStr)
+	expected := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-styles.mainLine.GetPaddingLeft(), "", dateStr, tagsStr)
 
 	str := delegate.renderItem(styles, item, 1, false)
 
@@ -117,9 +117,9 @@ func TestRenderItemSelected(t *testing.T) {
 	}
 	indexStr := delegate.renderIndex(styles.index, 1, true)
 	titleStr := delegate.renderTitle(styles.title, item.Title)
-	categoriesStr := delegate.renderCategories(styles.categories, styles.category, item.Tags)
+	tagsStr := delegate.renderTags(styles.tags, styles.tag, item.Tags)
 	dateStr := delegate.renderDate(styles.date, &item.CreatedAt.Time)
-	expected := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-styles.mainLine.GetPaddingLeft(), "", dateStr, categoriesStr)
+	expected := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-styles.mainLine.GetPaddingLeft(), "", dateStr, tagsStr)
 
 	str := delegate.renderItem(styles, item, 1, true)
 

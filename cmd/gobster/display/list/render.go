@@ -8,6 +8,7 @@ import (
 
 	bubblelist "github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/gobtronic/gobster/cmd/gobster/format"
 )
 
 const (
@@ -59,18 +60,18 @@ func (d itemDelegate) Render(w io.Writer, m bubblelist.Model, index int, listIte
 	}
 
 	selected := index == m.Index()
-	str := d.renderMainLine(newStyleProvider(selected), i, index, selected)
+	str := d.renderItem(newStyleProvider(selected), i, index, selected)
 	fmt.Fprint(w, str)
 }
 
-// Renders the item's main line (index, title and categories)
-func (d itemDelegate) renderMainLine(styles styleProvider, i Item, index int, selected bool) string {
+// Renders the item and all its subcomponents
+func (d itemDelegate) renderItem(styles styleProvider, i Item, index int, selected bool) string {
 	style := styles.mainLine
 	indexStr := d.renderIndex(styles.index, index, selected)
 	titleStr := d.renderTitle(styles.title, i.title)
 	categoriesStr := d.renderCategories(styles.categories, styles.category, i.categories)
 	dateStr := d.renderDate(styles.date, i.date)
-	str := fmt.Sprintf("%s %s %s\n%[4]*s%s", indexStr, titleStr, categoriesStr, itemPrefixLength-style.GetPaddingLeft(), "", dateStr)
+	str := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-style.GetPaddingLeft(), "", dateStr, categoriesStr)
 	return style.Render(str)
 }
 
@@ -86,6 +87,13 @@ func (d itemDelegate) renderIndex(style lipgloss.Style, index int, selected bool
 // Renders the item's title
 func (d itemDelegate) renderTitle(style lipgloss.Style, title string) string {
 	return style.Render(title)
+}
+
+func (d itemDelegate) renderDate(style lipgloss.Style, date *time.Time) string {
+	if date == nil {
+		return ""
+	}
+	return style.Render(format.FmtRelativeDateToNow(date))
 }
 
 // Renders the item's categories
@@ -105,11 +113,4 @@ func (d itemDelegate) renderCategory(style lipgloss.Style, cat string) string {
 	}
 	style = style.Foreground(bgColor)
 	return style.Render("<" + cat + ">")
-}
-
-func (d itemDelegate) renderDate(style lipgloss.Style, date *time.Time) string {
-	if date == nil {
-		return ""
-	}
-	return style.Render(date.Format(dateFormat))
 }

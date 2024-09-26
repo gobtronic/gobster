@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gobtronic/gobster/cmd/gobster/format"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,6 +41,17 @@ func TestRenderTitle(t *testing.T) {
 	assert.Equal(t, styles.title.Render("Title"), str)
 }
 
+func TestRenderDate(t *testing.T) {
+	styles := newStyleProvider(false)
+	delegate := itemDelegate{}
+	now := time.Now()
+	expected := format.FmtRelativeDateToNow(&now)
+
+	str := delegate.renderDate(styles.date, &now)
+
+	assert.Equal(t, styles.date.Render(expected), str)
+}
+
 func TestRenderCategories(t *testing.T) {
 	styles := newStyleProvider(false)
 	delegate := itemDelegate{}
@@ -69,7 +81,7 @@ func TestRenderCategory(t *testing.T) {
 	assert.Equal(t, expectedCatStyle.Render(fmt.Sprintf("<%s>", cat)), str)
 }
 
-func TestRenderMainLine(t *testing.T) {
+func TestRenderItem(t *testing.T) {
 	styles := newStyleProvider(false)
 	delegate := itemDelegate{}
 	item := Item{
@@ -86,12 +98,12 @@ func TestRenderMainLine(t *testing.T) {
 	dateStr := delegate.renderDate(styles.date, item.date)
 	expected := fmt.Sprintf("%s %s %s\n%[4]*s%s", indexStr, titleStr, categoriesStr, itemPrefixLength-styles.mainLine.GetPaddingLeft(), "", dateStr)
 
-	str := delegate.renderMainLine(styles, item, 1, false)
+	str := delegate.renderItem(styles, item, 1, false)
 
 	assert.Equal(t, styles.mainLine.Render(expected), str)
 }
 
-func TestRenderMainLineSelected(t *testing.T) {
+func TestRenderItemSelected(t *testing.T) {
 	styles := newStyleProvider(true)
 	delegate := itemDelegate{}
 	item := Item{
@@ -108,7 +120,7 @@ func TestRenderMainLineSelected(t *testing.T) {
 	dateStr := delegate.renderDate(styles.date, item.date)
 	expected := fmt.Sprintf("%s %s %s\n%[4]*s%s", indexStr, titleStr, categoriesStr, itemPrefixLength-styles.mainLine.GetPaddingLeft(), "", dateStr)
 
-	str := delegate.renderMainLine(styles, item, 1, true)
+	str := delegate.renderItem(styles, item, 1, true)
 
 	assert.Equal(t, styles.mainLine.Render(expected), str)
 }

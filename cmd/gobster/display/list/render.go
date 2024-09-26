@@ -23,7 +23,8 @@ type styleProvider struct {
 	title    lipgloss.Style
 	tags     lipgloss.Style
 	tag      lipgloss.Style
-	date     lipgloss.Style
+	dimmed   lipgloss.Style
+	score    lipgloss.Style
 }
 
 func newStyleProvider(selected bool) styleProvider {
@@ -42,7 +43,8 @@ func newStyleProvider(selected bool) styleProvider {
 
 	tagsStyle := lipgloss.NewStyle()
 	tagStyle := lipgloss.NewStyle().Italic(true)
-	dateStyle := lipgloss.NewStyle().Foreground(dimForeground)
+	dimmedStyle := lipgloss.NewStyle().Foreground(dimForeground)
+	scoreStyle := lipgloss.NewStyle()
 
 	return styleProvider{
 		mainLine: mainLineStyle,
@@ -50,7 +52,8 @@ func newStyleProvider(selected bool) styleProvider {
 		title:    titleStyle,
 		tags:     tagsStyle,
 		tag:      tagStyle,
-		date:     dateStyle,
+		dimmed:   dimmedStyle,
+		score:    scoreStyle,
 	}
 }
 
@@ -71,12 +74,17 @@ func (d itemDelegate) renderItem(styles styleProvider, i feed.Item, index int, s
 	indexStr := d.renderIndex(styles.index, index, selected)
 	titleStr := d.renderTitle(styles.title, i.Title)
 	tagsStr := d.renderTags(styles.tags, styles.tag, i.Tags)
-	dateStr := d.renderDate(styles.date, &i.CreatedAt.Time)
-	str := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-style.GetPaddingLeft(), "", dateStr, tagsStr)
+	scoreStr := d.renderScore(styles.dimmed, i.Score)
+	dateStr := d.renderDate(styles.dimmed, &i.CreatedAt.Time)
+	bottomComponents := []string{
+		scoreStr,
+		dateStr,
+		tagsStr,
+	}
+	str := fmt.Sprintf("%s %s\n%[3]*s%s", indexStr, titleStr, itemPrefixLength-style.GetPaddingLeft(), "", strings.Join(bottomComponents, styles.dimmed.Render(" · ")))
 	return style.Render(str)
 }
 
-// Renders the item's index
 func (d itemDelegate) renderIndex(style lipgloss.Style, index int, selected bool) string {
 	fmtIndex := fmt.Sprintf("%2d.", index+1)
 	if selected {
@@ -85,9 +93,12 @@ func (d itemDelegate) renderIndex(style lipgloss.Style, index int, selected bool
 	return style.Render(fmtIndex)
 }
 
-// Renders the item's title
 func (d itemDelegate) renderTitle(style lipgloss.Style, title string) string {
 	return style.Render(title)
+}
+
+func (d itemDelegate) renderScore(style lipgloss.Style, score int) string {
+	return style.Render(fmt.Sprintf("▲ %d", score))
 }
 
 func (d itemDelegate) renderDate(style lipgloss.Style, date *time.Time) string {
@@ -97,7 +108,6 @@ func (d itemDelegate) renderDate(style lipgloss.Style, date *time.Time) string {
 	return style.Render(format.FmtRelativeDateToNow(date))
 }
 
-// Renders the item's tags
 func (d itemDelegate) renderTags(style lipgloss.Style, tagStyle lipgloss.Style, tags []string) string {
 	fmtTags := []string{}
 	for _, t := range tags {
@@ -106,7 +116,6 @@ func (d itemDelegate) renderTags(style lipgloss.Style, tagStyle lipgloss.Style, 
 	return style.Render(strings.Join(fmtTags, " "))
 }
 
-// Renders a single tag
 func (d itemDelegate) renderTag(style lipgloss.Style, cat string) string {
 	bgColor := tagDefaultBackground
 	if color, ok := catBackgrounds[cat]; ok {

@@ -96,7 +96,7 @@ func TestRenderItem(t *testing.T) {
 	titleStr := delegate.renderTitle(styles.title, item.title)
 	categoriesStr := delegate.renderCategories(styles.categories, styles.category, item.categories)
 	dateStr := delegate.renderDate(styles.date, item.date)
-	expected := fmt.Sprintf("%s %s %s\n%[4]*s%s", indexStr, titleStr, categoriesStr, itemPrefixLength-styles.mainLine.GetPaddingLeft(), "", dateStr)
+	expected := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-styles.mainLine.GetPaddingLeft(), "", dateStr, categoriesStr)
 
 	str := delegate.renderItem(styles, item, 1, false)
 
@@ -118,7 +118,7 @@ func TestRenderItemSelected(t *testing.T) {
 	titleStr := delegate.renderTitle(styles.title, item.title)
 	categoriesStr := delegate.renderCategories(styles.categories, styles.category, item.categories)
 	dateStr := delegate.renderDate(styles.date, item.date)
-	expected := fmt.Sprintf("%s %s %s\n%[4]*s%s", indexStr, titleStr, categoriesStr, itemPrefixLength-styles.mainLine.GetPaddingLeft(), "", dateStr)
+	expected := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-styles.mainLine.GetPaddingLeft(), "", dateStr, categoriesStr)
 
 	str := delegate.renderItem(styles, item, 1, true)
 

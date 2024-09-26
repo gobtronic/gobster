@@ -2,18 +2,29 @@ package display
 
 import (
 	"testing"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/mmcdole/gofeed"
+	"github.com/gobtronic/gobster/cmd/gobster/feed"
 	"github.com/stretchr/testify/assert"
 )
 
-func feedMock() gofeed.Feed {
-	return gofeed.Feed{
-		Items: []*gofeed.Item{
-			{Title: "Discussion 1"},
-			{Title: "Discussion 2"},
-			{Title: "Discussion 3"},
+func feedMock() feed.LobsterFeed {
+	return feed.LobsterFeed{
+		feed.Item{
+			Title:     "Title",
+			CreatedAt: feed.ItemTime{Time: time.Now()},
+			Tags:      []string{"programming", "go"},
+		},
+		feed.Item{
+			Title:     "Title",
+			CreatedAt: feed.ItemTime{Time: time.Now()},
+			Tags:      []string{"programming", "go"},
+		},
+		feed.Item{
+			Title:     "Title",
+			CreatedAt: feed.ItemTime{Time: time.Now()},
+			Tags:      []string{"programming", "go"},
 		},
 	}
 }

@@ -8,6 +8,7 @@ import (
 
 	bubblelist "github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/gobtronic/gobster/cmd/gobster/feed"
 	"github.com/gobtronic/gobster/cmd/gobster/format"
 )
 
@@ -54,7 +55,7 @@ func newStyleProvider(selected bool) styleProvider {
 }
 
 func (d itemDelegate) Render(w io.Writer, m bubblelist.Model, index int, listItem bubblelist.Item) {
-	i, ok := listItem.(Item)
+	i, ok := listItem.(feed.Item)
 	if !ok {
 		return
 	}
@@ -65,12 +66,12 @@ func (d itemDelegate) Render(w io.Writer, m bubblelist.Model, index int, listIte
 }
 
 // Renders the item and all its subcomponents
-func (d itemDelegate) renderItem(styles styleProvider, i Item, index int, selected bool) string {
+func (d itemDelegate) renderItem(styles styleProvider, i feed.Item, index int, selected bool) string {
 	style := styles.mainLine
 	indexStr := d.renderIndex(styles.index, index, selected)
-	titleStr := d.renderTitle(styles.title, i.title)
-	categoriesStr := d.renderCategories(styles.categories, styles.category, i.categories)
-	dateStr := d.renderDate(styles.date, i.date)
+	titleStr := d.renderTitle(styles.title, i.Title)
+	categoriesStr := d.renderCategories(styles.categories, styles.category, i.Tags)
+	dateStr := d.renderDate(styles.date, &i.CreatedAt.Time)
 	str := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-style.GetPaddingLeft(), "", dateStr, categoriesStr)
 	return style.Render(str)
 }

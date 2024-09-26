@@ -7,17 +7,17 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	listdef "github.com/gobtronic/gobster/cmd/gobster/display/list"
-	"github.com/mmcdole/gofeed"
+	"github.com/gobtronic/gobster/cmd/gobster/feed"
 )
 
 type model struct {
-	feed *gofeed.Feed
+	feed *feed.LobsterFeed
 	list list.Model
 	err  error
 }
 
 // Returns a new display.model
-func NewModel(feed *gofeed.Feed, initialTermSize [2]int) model {
+func NewModel(feed *feed.LobsterFeed, initialTermSize [2]int) model {
 	l := listdef.NewList(feed, initialTermSize)
 	return model{
 		feed: feed,
@@ -41,7 +41,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case " ", "enter":
-			item := m.list.SelectedItem().(listdef.Item)
+			item := m.list.SelectedItem().(feed.Item)
 			openInBrowser(item.Url)
 			return m, nil
 		}

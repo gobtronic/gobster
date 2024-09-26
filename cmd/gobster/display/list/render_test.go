@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gobtronic/gobster/cmd/gobster/feed"
 	"github.com/gobtronic/gobster/cmd/gobster/format"
 	"github.com/stretchr/testify/assert"
 )
@@ -84,18 +85,18 @@ func TestRenderCategory(t *testing.T) {
 func TestRenderItem(t *testing.T) {
 	styles := newStyleProvider(false)
 	delegate := itemDelegate{}
-	item := Item{
-		title: "Title",
-		categories: []string{
+	item := feed.Item{
+		Title:     "Title",
+		CreatedAt: feed.ItemTime{Time: testDate},
+		Tags: []string{
 			"programming",
 			"go",
 		},
-		date: &testDate,
 	}
 	indexStr := delegate.renderIndex(styles.index, 1, false)
-	titleStr := delegate.renderTitle(styles.title, item.title)
-	categoriesStr := delegate.renderCategories(styles.categories, styles.category, item.categories)
-	dateStr := delegate.renderDate(styles.date, item.date)
+	titleStr := delegate.renderTitle(styles.title, item.Title)
+	categoriesStr := delegate.renderCategories(styles.categories, styles.category, item.Tags)
+	dateStr := delegate.renderDate(styles.date, &item.CreatedAt.Time)
 	expected := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-styles.mainLine.GetPaddingLeft(), "", dateStr, categoriesStr)
 
 	str := delegate.renderItem(styles, item, 1, false)
@@ -106,18 +107,18 @@ func TestRenderItem(t *testing.T) {
 func TestRenderItemSelected(t *testing.T) {
 	styles := newStyleProvider(true)
 	delegate := itemDelegate{}
-	item := Item{
-		title: "Title",
-		categories: []string{
+	item := feed.Item{
+		Title:     "Title",
+		CreatedAt: feed.ItemTime{Time: testDate},
+		Tags: []string{
 			"programming",
 			"go",
 		},
-		date: &testDate,
 	}
 	indexStr := delegate.renderIndex(styles.index, 1, true)
-	titleStr := delegate.renderTitle(styles.title, item.title)
-	categoriesStr := delegate.renderCategories(styles.categories, styles.category, item.categories)
-	dateStr := delegate.renderDate(styles.date, item.date)
+	titleStr := delegate.renderTitle(styles.title, item.Title)
+	categoriesStr := delegate.renderCategories(styles.categories, styles.category, item.Tags)
+	dateStr := delegate.renderDate(styles.date, &item.CreatedAt.Time)
 	expected := fmt.Sprintf("%s %s\n%[3]*s%s %s", indexStr, titleStr, itemPrefixLength-styles.mainLine.GetPaddingLeft(), "", dateStr, categoriesStr)
 
 	str := delegate.renderItem(styles, item, 1, true)

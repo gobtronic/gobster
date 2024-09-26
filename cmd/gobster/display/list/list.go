@@ -1,14 +1,11 @@
 package list
 
 import (
-	"strings"
-	"time"
-
 	"github.com/charmbracelet/bubbles/key"
 	bubblelist "github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/mmcdole/gofeed"
+	"github.com/gobtronic/gobster/cmd/gobster/feed"
 )
 
 var (
@@ -37,22 +34,13 @@ var catBackgrounds map[string]lipgloss.AdaptiveColor = map[string]lipgloss.Adapt
 	"meta":       tagGreyBackground,
 }
 
-type Item struct {
-	title      string
-	categories []string
-	Url        string
-	date       *time.Time
-}
-
-func (i Item) FilterValue() string { return i.title + strings.Join(i.categories, " ") }
-
 type itemDelegate struct{}
 
 func (d itemDelegate) Height() int                                   { return 2 }
 func (d itemDelegate) Spacing() int                                  { return 0 }
 func (d itemDelegate) Update(_ tea.Msg, _ *bubblelist.Model) tea.Cmd { return nil }
 
-func NewList(feed *gofeed.Feed, initialTermSize [2]int) bubblelist.Model {
+func NewList(feed *feed.LobsterFeed, initialTermSize [2]int) bubblelist.Model {
 	l := bubblelist.New([]bubblelist.Item{}, itemDelegate{}, initialTermSize[0], initialTermSize[1])
 	l.Title = "lobste.rs - active discussions"
 	l.SetShowStatusBar(false)
@@ -70,13 +58,8 @@ func NewList(feed *gofeed.Feed, initialTermSize [2]int) bubblelist.Model {
 	}
 
 	items := []bubblelist.Item{}
-	for _, v := range feed.Items {
-		items = append(items, Item{
-			title:      v.Title,
-			categories: v.Categories,
-			Url:        v.Link,
-			date:       v.PublishedParsed,
-		})
+	for _, v := range *feed {
+		items = append(items, v)
 	}
 	l.SetItems(items)
 

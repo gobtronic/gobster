@@ -3,10 +3,9 @@ package main
 import (
 	"os"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
 	"github.com/gobtronic/gobster/cmd/gobster/load"
-
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {

@@ -2,13 +2,14 @@ package load
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	"github.com/gobtronic/gobster/cmd/gobster/display"
-	"github.com/mmcdole/gofeed"
+	"github.com/gobtronic/gobster/cmd/gobster/feed"
 )
 
 type model struct {
@@ -44,7 +45,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 
-	case *gofeed.Feed:
+	case *feed.LobsterFeed:
 		displayModel := display.NewModel(msg, m.termSize)
 		return displayModel, displayModel.Init()
 	case error:
@@ -72,10 +73,17 @@ func (m model) View() string {
 // Retrieves and parses the lobste.rs rss feed
 // Returns the feed if it succeed, returns an error otherwise
 func parseFeed() tea.Msg {
-	fp := gofeed.NewParser()
-	feed, err := fp.ParseURL("https://lobste.rs/rss")
+	f, err := tea.LogToFile("debug.log", "debug")
 	if err != nil {
+		fmt.Println("fatal:", err)
+		os.Exit(1)
+	}
+	defer f.Close()
+
+	feed, err := feed.FetchFeed(feed.Active)
+	if err != nil {
+		f.WriteString(err.Error() + "\n")
 		return err
 	}
-	return feed
+	return &feed
 }

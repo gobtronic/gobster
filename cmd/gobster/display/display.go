@@ -40,9 +40,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
-		case " ", "enter":
+		case "o":
 			item := m.list.SelectedItem().(feed.Item)
-			openInBrowser(item.Url)
+			openInBrowser(item.ShortIdUrl)
 			return m, nil
 		}
 	}

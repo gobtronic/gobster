@@ -51,8 +51,8 @@ func NewList(feed *feed.LobsterFeed, initialTermSize [2]int) bubblelist.Model {
 	l.AdditionalShortHelpKeys = func() []key.Binding {
 		return []key.Binding{
 			key.NewBinding(
-				key.WithKeys(" ", "enter"),
-				key.WithHelp("space/enter", "open in browser"),
+				key.WithKeys("o"),
+				key.WithHelp("o", "open discussion in browser"),
 			),
 		}
 	}

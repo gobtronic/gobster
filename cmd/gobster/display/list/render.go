@@ -76,12 +76,17 @@ func (d itemDelegate) renderItem(styles styleProvider, i feed.Item, index int, s
 	tagsStr := d.renderTags(styles.tags, styles.tag, i.Tags)
 	scoreStr := d.renderScore(styles.dimmed, i.Score)
 	dateStr := d.renderDate(styles.dimmed, &i.CreatedAt.Time)
+	commentStr := d.renderComments(styles.dimmed, i.CommentCount)
+	topComponents := []string{
+		titleStr,
+		dateStr,
+	}
 	bottomComponents := []string{
 		scoreStr,
-		dateStr,
 		tagsStr,
+		commentStr,
 	}
-	str := fmt.Sprintf("%s %s\n%[3]*s%s", indexStr, titleStr, itemPrefixLength-style.GetPaddingLeft(), "", strings.Join(bottomComponents, styles.dimmed.Render(" · ")))
+	str := fmt.Sprintf("%s %s\n%[3]*s%s", indexStr, strings.Join(topComponents, " "), itemPrefixLength-style.GetPaddingLeft(), "", strings.Join(bottomComponents, styles.dimmed.Render(" · ")))
 	return style.Render(str)
 }
 
@@ -123,4 +128,15 @@ func (d itemDelegate) renderTag(style lipgloss.Style, cat string) string {
 	}
 	style = style.Foreground(bgColor)
 	return style.Render("<" + cat + ">")
+}
+
+func (d itemDelegate) renderComments(style lipgloss.Style, count int) string {
+	plural := "s"
+	switch count {
+	case 0:
+		return "no comments"
+	case 1:
+		plural = ""
+	}
+	return style.Render(fmt.Sprintf("%d comment%s", count, plural))
 }
